@@ -1,0 +1,16 @@
+/elevation_mapping_node:
+  ros__parameters:
+    map_frame: "map"
+    base_frame: "base_link"
+    corrected_map_frame: "map"
+
+    subscribers:
+      lidar:
+        topic_name: "/fastlio2/world_cloud"
+        data_type: "pointcloud"
+
+    publishers:
+      elevation_map:
+        layers: ["elevation", "variance", "traversability"]
+        basic_layers: ["elevation"]
+        fps: 5.0

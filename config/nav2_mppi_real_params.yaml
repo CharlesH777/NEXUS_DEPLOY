@@ -1,0 +1,266 @@
+# Nav2 MPPI controller params for the NEXUS real robot.
+# Frames use "map" as the global frame and "base_footprint" as the robot frame.
+# The traversability_map OccupancyGrid feeds both costmaps.
+# MPPI parameters mirror the prior custom mppi_navigator config.
+
+controller_server:
+  ros__parameters:
+    use_sim_time: False
+    controller_frequency: 20.0
+    min_x_velocity_threshold: 0.001
+    min_y_velocity_threshold: 0.5
+    min_theta_velocity_threshold: 0.001
+    failure_tolerance: 0.5
+    progress_checker_plugin: "progress_checker"
+    goal_checker_plugins: ["general_goal_checker"]
+    controller_plugins: ["FollowPath"]
+    speed_limit_topic: "speed_limit"
+
+    progress_checker:
+      plugin: "nav2_controller::SimpleProgressChecker"
+      required_movement_radius: 0.5
+      movement_time_allowance: 30.0
+    general_goal_checker:
+      stateful: False
+      plugin: "nav2_controller::SimpleGoalChecker"
+      xy_goal_tolerance: 0.001
+      yaw_goal_tolerance: 0.001
+    FollowPath:
+      plugin: "nav2_mppi_controller::MPPIController"
+      time_steps: 56
+      model_dt: 0.05
+      batch_size: 1000
+      vx_std: 0.50
+      vy_std: 0.35
+      wz_std: 0.55
+      vx_max: 1.5
+      vx_min: -0.3
+      vy_max: 0.6
+      wz_max: 1.4
+      ax_max: 3.0
+      ay_max: 2.0
+      awz_max: 3.0
+      iteration_count: 1
+      temperature: 0.5
+      gamma: 0.015
+      motion_model: "Omni"
+      retry_attempt_limit: 1
+      transform_tolerance: 0.5
+      consider_strafing: True
+      critics:
+        - "ConstraintCritic"
+        - "CostCritic"
+        - "GoalCritic"
+        - "GoalAngleCritic"
+        - "PathAlignCritic"
+        - "PathFollowCritic"
+        - "PathAngleCritic"
+        - "PreferForwardCritic"
+        - "TwirlingCritic"
+        - "ObstaclesCritic"
+      ConstraintCritic.scale: 4.0
+      CostCritic.scale: 4.0
+      CostCritic.critical_cost: 5000.0
+      GoalCritic.scale: 10.0
+      GoalCritic.threshold_to_consider: 1.4
+      GoalAngleCritic.scale: 1.5
+      GoalAngleCritic.threshold_to_consider: 0.25
+      PathAlignCritic.scale: 1.5
+      PathAlignCritic.threshold_to_consider: 0.4
+      PathAlignCritic.max_path_occupancy_ratio: 0.15
+      PathFollowCritic.scale: 1.5
+      PathFollowCritic.threshold_to_consider: 0.5
+      PathFollowCritic.decelerate_distance: 0.2
+      PathAngleCritic.scale: 1.5
+      PathAngleCritic.threshold_to_consider: 0.5
+      PathAngleCritic.max_angle_to_finite_path: 1.2
+      PathAngleCritic.critics_flag: true
+      PreferForwardCritic.scale: 0.25
+      TwirlingCritic.scale: 0.005
+      TwirlingCritic.zeta_angle: 0.05
+      ObstaclesCritic.scale: 3.0
+      ObstaclesCritic.collision_cost: 5000.0
+      ObstaclesCritic.collision_margin_distance: 0.15
+      ObstaclesCritic.near_goal_distance: 0.5
+      ObstaclesCritic.cost_scaling_factor: 10.0
+      ObstaclesCritic.inflation_radius: 0.25
+      ObstaclesCritic.inflation_scale_factor: 10.0
+
+local_costmap:
+  local_costmap:
+    ros__parameters:
+      update_frequency: 5.0
+      publish_frequency: 2.0
+      global_frame: map
+      robot_base_frame: base_footprint
+      use_sim_time: False
+      rolling_window: true
+      width: 10
+      height: 10
+      resolution: 0.1
+      robot_radius: 0.18
+      plugins: ["static_layer", "inflation_layer"]
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        cost_scaling_factor: 3.0
+        inflation_radius: 0.25
+      static_layer:
+        plugin: "nav2_costmap_2d::StaticLayer"
+        map_subscribe_transient_local: True
+        map_topic: /traversability_map
+        observe_duration: 0.0
+        transform_tolerance: 0.5
+      always_send_full_costmap: True
+
+global_costmap:
+  global_costmap:
+    ros__parameters:
+      update_frequency: 2.0
+      publish_frequency: 1.0
+      global_frame: map
+      robot_base_frame: base_footprint
+      use_sim_time: False
+      robot_radius: 0.18
+      resolution: 0.1
+      track_unknown_space: true
+      plugins: ["static_layer", "inflation_layer"]
+      static_layer:
+        plugin: "nav2_costmap_2d::StaticLayer"
+        map_subscribe_transient_local: True
+        map_topic: /traversability_map
+        transform_tolerance: 0.5
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        cost_scaling_factor: 3.0
+        inflation_radius: 0.25
+      always_send_full_costmap: True
+
+map_server:
+  ros__parameters:
+    use_sim_time: False
+    yaml_filename: ""
+
+planner_server:
+  ros__parameters:
+    expected_planner_frequency: 5.0
+    use_sim_time: False
+    planner_plugins: ["GridBased"]
+    GridBased:
+      plugin: "nav2_navfn_planner/NavfnPlanner"
+      tolerance: 0.5
+      use_astar: true
+      allow_unknown: true
+      use_final_approach_path_orientation: false
+
+smoother_server:
+  ros__parameters:
+    use_sim_time: False
+    smoother_plugins: ["simple_smoother"]
+    simple_smoother:
+      plugin: "nav2_smoother::SimpleSmoother"
+      tolerance: 1.0e-10
+      max_its: 1000
+      do_refinement: True
+
+behavior_server:
+  ros__parameters:
+    costmap_topic: local_costmap/costmap_raw
+    footprint_topic: local_costmap/published_footprint
+    cycle_frequency: 10.0
+    behavior_plugins: ["spin", "backup", "drive_on_heading", "wait"]
+    spin:
+      plugin: "nav2_behaviors/Spin"
+    backup:
+      plugin: "nav2_behaviors/BackUp"
+    drive_on_heading:
+      plugin: "nav2_behaviors/DriveOnHeading"
+    wait:
+      plugin: "nav2_behaviors/Wait"
+    global_frame: map
+    robot_base_frame: base_footprint
+    transform_tolerance: 0.5
+    use_sim_time: False
+    simulate_ahead_time: 2.0
+    max_rotational_vel: 1.4
+    min_rotational_vel: 0.1
+    rotational_acc_lim: 2.5
+
+bt_navigator:
+  ros__parameters:
+    use_sim_time: False
+    global_frame: map
+    robot_base_frame: base_footprint
+    odom_topic: /odom
+    bt_loop_duration: 10
+    default_server_timeout: 20
+    wait_for_service_timeout: 1000
+    action_server_result_timeout: 900.0
+    plugin_lib_names:
+      - nav2_compute_path_to_pose_action_bt_node
+      - nav2_compute_path_through_poses_action_bt_node
+      - nav2_smooth_path_action_bt_node
+      - nav2_follow_path_action_bt_node
+      - nav2_spin_action_bt_node
+      - nav2_wait_action_bt_node
+      - nav2_assisted_teleop_action_bt_node
+      - nav2_back_up_action_bt_node
+      - nav2_drive_on_heading_bt_node
+      - nav2_clear_costmap_service_bt_node
+      - nav2_is_stuck_condition_bt_node
+      - nav2_goal_reached_condition_bt_node
+      - nav2_goal_updated_condition_bt_node
+      - nav2_globally_updated_goal_condition_bt_node
+      - nav2_is_path_valid_condition_bt_node
+      - nav2_initial_pose_received_condition_bt_node
+      - nav2_reinitialize_global_localization_service_bt_node
+      - nav2_rate_controller_bt_node
+      - nav2_distance_controller_bt_node
+      - nav2_speed_controller_bt_node
+      - nav2_truncate_path_action_bt_node
+      - nav2_truncate_path_local_action_bt_node
+      - nav2_goal_updater_node_bt_node
+      - nav2_recovery_node_bt_node
+      - nav2_pipeline_sequence_bt_node
+      - nav2_round_robin_node_bt_node
+      - nav2_transform_available_condition_bt_node
+      - nav2_time_expired_condition_bt_node
+      - nav2_path_expiring_timer_condition
+      - nav2_distance_traveled_condition_bt_node
+      - nav2_single_trigger_bt_node
+      - nav2_goal_updated_controller_bt_node
+      - nav2_is_battery_low_condition_bt_node
+      - nav2_navigate_through_poses_action_bt_node
+      - nav2_navigate_to_pose_action_bt_node
+      - nav2_remove_passed_goals_action_bt_node
+      - nav2_planner_selector_bt_node
+      - nav2_controller_selector_bt_node
+      - nav2_goal_checker_selector_bt_node
+      - nav2_controller_cancel_bt_node
+      - nav2_path_longer_on_approach_bt_node
+      - nav2_wait_cancel_bt_node
+      - nav2_spin_cancel_bt_node
+      - nav2_back_up_cancel_bt_node
+      - nav2_assisted_teleop_cancel_bt_node
+
+waypoint_follower:
+  ros__parameters:
+    use_sim_time: False
+    loop_rate: 20
+    stop_on_failure: false
+    waypoint_task_plugin: "wait_at_waypoint"
+    wait_at_waypoint:
+      plugin: "nav2_waypoint_follower::WaitAtWaypoint"
+      enabled: True
+      waypoint_pause_duration: 200
+
+velocity_smoother:
+  ros__parameters:
+    use_sim_time: False
+    smoothing_frequency: 20.0
+    scale_velocities: False
+    feedback: "OPEN_LOOP"
+    max_velocity: [1.5, 0.6, 1.4]
+    min_velocity: [-0.3, -0.6, -1.4]
+    max_accel: [3.0, 2.0, 3.0]
+    deadband_velocity: [0.0, 0.0, 0.0]
+    velocity_timeout: 1.0

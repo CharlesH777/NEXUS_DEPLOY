@@ -1,0 +1,30 @@
+/sand_mpc_compensator:
+  ros__parameters:
+    use_sim_time: false
+    input_cmd_topic: "/mppi/cmd_vel_raw"
+    output_cmd_topic: "/cmd_vel"
+    odom_topic: "/odom"
+    control_rate: 20.0
+    command_timeout_sec: 0.30
+    odom_timeout_sec: 0.6
+    translational_deadband: 0.02
+    preserve_lateral_direction: true
+    passthrough_on_missing_odom: true
+    publish_zero_on_timeout: true
+
+    horizon: 10
+    dt_nominal: 0.05
+    cmd_delay: 0.05
+    drive_tau: 0.08
+    turn_tau: 0.08
+    q_v: 120.0
+    q_int_v: 12.0
+    r_du_v: 0.30
+    q_w: 80.0
+    q_int_w: 6.0
+    r_du_w: 0.50
+    slip_alpha: 0.20
+    slip_init: 0.20
+    correction_gain: 0.30
+    v_max: 1.50
+    w_max: 1.40
