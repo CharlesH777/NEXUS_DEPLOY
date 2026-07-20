@@ -1,0 +1,73 @@
+# ============================================================================
+# NEXUS_LIDAR_SIM / DEPLOY - ROS2 Colcon Workspace .gitignore
+# ============================================================================
+
+# ---- Colcon / ROS2 build artifacts ----
+build/
+install/
+log/
+log_*/
+
+# ---- Generated outputs (kept directory-level to avoid hitting test data) ----
+output/
+
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+*.so
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ---- C/C++ build objects ----
+*.o
+*.obj
+*.a
+*.lo
+*.la
+.libs/
+
+# ---- VS Code (machine-specific kept out; settings.json shared) ----
+.vscode/browse.vc.db
+.vscode/browse.vc.db.*
+.vscode/c_cpp_properties.json
+.vscode/launch.json
+.vscode/tasks.json
+.history/
+
+# ---- JetBrains / other IDEs ----
+.idea/
+.cache/
+.clangd/
+compile_commands.json
+
+# ---- Editor backup / swap ----
+*~
+*.swp
+*.swo
+*.orig
+*.rej
+*.bak
+
+# ---- OS metadata ----
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+desktop.ini
+
+# ---- Tags / cscope ----
+tags
+TAGS
+cscope.*
+nsca.*
+
+# ---- Temp / runtime ----
+*.tmp
+*.log
+tmp/
+temp/
